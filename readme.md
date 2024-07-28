@@ -1,22 +1,58 @@
-# Start the Docker
-At first, you should start the wsl2 terminal.
-You should run following command in wsl terminal or linux bash.
+# Test the float models
+Get the reconstructed images from original images
 ```
- ./docker_run.sh xilinx/vitis-ai-pytorch-cpu:latest
+python .\rendernet_amd_block.py --input-file .\ILSVRC2012_val_00045087.JPEG --output-file reconstructed_image.png --mode encode_render 
 ```
-# Switch virtual environment and install some packages
+Get the patches' categories from original images
 ```
-conda activate vitis-ai-pytorch
-pip install timm einops tqdm
+python .\rendernet_amd_block.py --input-file .\ILSVRC2012_val_00045087.JPEG --output-file test_img_patch_cls.pth --mode encode --patch-cls
 ```
-# download the checkpoint and dataset
-download the checkpoint
+Get the patches' embeddings from original images
+```
+python .\rendernet_amd_block.py --input-file .\ILSVRC2012_val_00045087.JPEG --output-file test_img_patch_embed.pth --mode encode
+```
+Get the reconstructed images from the patch embeddings
+```
+python .\rendernet_amd_block.py --input-file .\test_img_patch_embed.pth --output-file reconstructed_image.png --mode render
+```
+# Test the quantization models with onnx session
+Get the reconstructed images from original images
+```
+python .\rendernet_onnx.py --input-file .\ILSVRC2012_val_00045087.JPEG --output-file reconstructed_image.png --mode encode_render --checkpoint quantization\quantization_results_512\Sequential_int.onnx --img 512
+```
+Get the patches' categories from original images
+```
+python .\rendernet_onnx.py --input-file .\ILSVRC2012_val_00045087.JPEG --output-file test_img_patch_cls.pth --mode encode --patch-cls --checkpoint quantization\quantization_results_512\Sequential_int.onnx --img 512
+```
+Get the patches' embeddings from original images
+```
+python .\rendernet_onnx.py --input-file .\ILSVRC2012_val_00045087.JPEG --output-file test_img_patch_embed.pth --mode encode --checkpoint quantization\quantization_results_512\Sequential_int.onnx --img 512
+```
+Get the reconstructed images from the patch embeddings
+```
+python .\rendernet_onnx.py --input-file .\test_img_patch_embed.pth --output-file reconstructed_image.png --mode render --checkpoint quantization\quantization_results_512\Sequential_int.onnx --img 512
+```
+## Test the benchmark with 256*256 resolution
+On NPU device
+```
+python .\rendernet_onnx.py --mode benchmark --checkpoint quantization\quantization_results_256\Sequential_int.onnx --target NPU --img-size 256
+```
+You can get the results with 'Average inference time per run: 0.0866 seconds on NPU device'
 
-# Quantizate the model
+On CPU device
 ```
-python rendernet_quant.py --checkpoint rendernet_tiny_amd_patch8_ft.pth --dataset-path minitrain3 --output-path quantization_results_256 --img-size 256
+python .\rendernet_onnx.py --mode benchmark --checkpoint quantization\quantization_results_256\Sequential_int.onnx --target CPU --img-size 256
 ```
-quantizate the model with 512*512 resolutions
+You can get the results with 'Average inference time per run: 0.0974 seconds on CPU device'
+## Test the benchmark with 512*512 resolution
+On NPU device
 ```
-python rendernet_quant.py --checkpoint rendernet_tiny_amd_patch8_ft.pth --dataset-path minitrain3 --output-path quantization_results_512 --img-size 256
+python .\rendernet_onnx.py --mode benchmark --checkpoint quantization\quantization_results_512\Sequential_int.onnx --target NPU --img-size 512
 ```
+You can get the results with 'Average inference time per run: 0.2966 seconds on NPU device'
+
+On CPU device
+```
+python .\rendernet_onnx.py --mode benchmark --checkpoint quantization\quantization_results_512\Sequential_int.onnx --target CPU --img-size 512
+```
+You can get the results with 'Average inference time per run: 0.3707 seconds on CPU device'

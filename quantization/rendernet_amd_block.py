@@ -231,7 +231,7 @@ if __name__ == "__main__":
 
     parser.add_argument(
         '--checkpoint',
-        default=r"quantization\rendernet_tiny_amd_patch8_ft.pth",
+        default="rendernet_tiny_amd_patch8_ft.pth",
         help='the path to the float checkpoint ')
     parser.add_argument('--mode', 
         default='encode_render', 
@@ -249,9 +249,6 @@ if __name__ == "__main__":
     parser.add_argument('--output-file', 
         default='',
         help='the path to save the results of encode or decode')
-    parser.add_argument('--img-size', 
-        default=256,type=int,
-        help='the original shape of images')
     args, _ = parser.parse_known_args()
     ckpt=torch.load(args.checkpoint)
     model=RenderNet_patch8_256_tiny()
@@ -259,21 +256,20 @@ if __name__ == "__main__":
     model.eval()
     if args.mode=='encode_render':
         img=Image.open(args.input_file)
-        trans=transforms.Compose([transforms.Resize((args.img_size,args.img_size)),transforms.ToTensor(),transforms.Normalize((0.5,0.5,0.5),(1,1,1))])
-        img_t=trans(img).unsqueeze(dim=0)
+        trans=transforms.Compose([transforms.Resize(256),transforms.ToTensor(),transforms.Normalize((0.5,0.5,0.5),(1,1,1))])
+        img_t=trans(img)
         with torch.no_grad():
             out,patch_img=model(img_t)
             plt.imshow(out[0].permute(1,2,0).numpy())
-            plt.axis('off')
-            plt.savefig(args.output_file)
+            plt.savefig(args.out_file)
     elif args.mode=='encode':
         img=Image.open(args.input_file)
-        trans=transforms.Compose([transforms.Resize((args.img_size,args.img_size)),transforms.ToTensor(),transforms.Normalize((0.5,0.5,0.5),(1,1,1))])
-        img_t=trans(img).unsqueeze(dim=0)
+        trans=transforms.Compose([transforms.Resize(256),transforms.ToTensor(),transforms.Normalize((0.5,0.5,0.5),(1,1,1))])
+        img_t=trans(img)
         with torch.no_grad():
             if args.patch_cls:
                 patch_cls=model.encodeImage(img_t,return_patch_cls=True)
-                torch.save(patch_cls,args.output_file)
+                torch.save(patch_cls,args.out_file)
             elif args.no_combine:
                 patch_embed,patch_img,patch_res=model.encodeImage(img_t,False)
                 torch.save(patch_embed,args.output_file)
@@ -285,8 +281,7 @@ if __name__ == "__main__":
         with torch.no_grad():
             out,patch_img=model.renderImage(patch_embed)
             plt.imshow(out[0].permute(1,2,0).numpy())
-            plt.axis('off')
-            plt.savefig(args.output_file)
+            plt.savefig(args.out_file)
     else:
         print(f'there is no mode for {args.mode}')
 
