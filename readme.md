@@ -1,3 +1,26 @@
+# CST-AutoEncoder
+This project is designed for the AMD Pervasive AI Developer Contest. Its goal is to design an easy-to-deploy AutoEncoder for Ryzen AI PC.
+# The idea to separate Color, Shape, and Texture from the image and reconstruct the image by RenderNet
+![](CSTAutoEncoder.png)
+
+
+# Get Start
+At first, you should have an AMD Ryzen AI Powered PC.
+
+Then you should open the NPU device in BIOS, and install the drivers and applications for the PC.
+
+Open the NPU device in Bios and Install [NPU driver](https://ryzenai.docs.amd.com/en/latest/inst.html)
+
+Install the [Ryzen AI Software](https://ryzenai.docs.amd.com/en/latest/inst.html)
+
+Install [wsl2](https://learn.microsoft.com/en-us/windows/wsl/install) and [docker](https://docs.docker.com/desktop/install/windows-install/).
+
+Download the checkpoint and minitrain3 datasets from [Google Drive](https://drive.google.com/file/d/1pknX4-zAIZlRBdwJbnaJZN2VbH7siUiK/view?usp=sharing)
+
+And put the checkpoint and minitrain3 into the quantization folder.
+# Quantization
+You can follow the [readme](.\quantization\readme.md) to quantify the model.
+
 # Test the float models
 Get the reconstructed images from original images
 ```
